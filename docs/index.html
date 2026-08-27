@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="theme-color" content="#DCB35C">
+    <title>Go Kifu</title>
+
+    <!-- PWA: манифест и иконки (установка на домашний экран) -->
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/png" href="icon-192.png">
+
+    <!-- iOS: standalone-режим, иконка и заголовок при добавлении на экран.
+         На iOS полагаемся на apple-* мета/иконку — манифест Safari учитывает частично. -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Go Kifu">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+    <style>
+        /* ComposeViewport сам создаёт холст внутри body и держит его по размеру окна. */
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #F2F2F7; }
+    </style>
+</head>
+<body>
+    <script src="gokifu.js"></script>
+    <script>
+        // Service worker предзагружает весь app-shell + ресурсы при установке — приложение
+        // работает ПОЛНОСТЬЮ офлайн (сам sw.js генерируется после сборки со списком файлов).
+        //
+        // ОБНОВЛЕНИЕ ВЕРСИИ. Пользователь не должен знать слова «кэш»: приложение обязано подхватывать
+        // новую версию само. Прецедент (2026-07-30): на ПК осталась сборка недельной свежести — без
+        // мини-прокси, из-за чего синхронизация молча не работала, а на планшете всё шло нормально.
+        // Поэтому здесь три уровня:
+        //   1) проверка обновления при запуске и при каждом возврате к приложению;
+        //   2) когда новая версия встала — перезагрузка (мгновенно, если человек только открыл
+        //      приложение, иначе при следующем возврате к нему, чтобы не выдёргивать посреди записи);
+        //   3) страховка: сверяем версию из свежего sw.js с именем нашего кэша. Если наш кэш отстал,
+        //      а обычный путь обновления не сработал — чистим кэши, снимаем регистрацию и
+        //      перезагружаемся. Это лечит любое застревание без участия пользователя.
+        (function () {
+            if (!('serviceWorker' in navigator)) return;
+            var ОТКРЫТО = Date.now();
+            var перезагружаемся = false;
+            var ждётПерезагрузки = false;
+
+            function перезагрузить() {
+                if (перезагружаемся) return;
+                перезагружаемся = true;
+                location.reload();
+            }
+
+            // Свежий запуск (меньше минуты) — обновляемся сразу, человек ещё ничего не делает.
+            // Иначе ждём, когда он свернёт приложение и вернётся: тогда перезагрузка незаметна.
+            function обновитьсяАккуратно() {
+                if (Date.now() - ОТКРЫТО < 60000 || document.visibilityState === 'hidden') перезагрузить();
+                else ждётПерезагрузки = true;
+            }
+
+            document.addEventListener('visibilitychange', function () {
+                if (document.visibilityState !== 'visible') return;
+                if (ждётПерезагрузки) { перезагрузить(); return; }
+                navigator.serviceWorker.getRegistration().then(function (r) { if (r) r.update(); });
+                сверитьВерсию();
+            });
+
+            // Новый service worker перехватил управление — значит версия сменилась.
+            navigator.serviceWorker.addEventListener('controllerchange', обновитьсяАккуратно);
+
+            // Страховка: сравниваем версию из выложенного sw.js с именем кэша, которым пользуемся.
+            function сверитьВерсию() {
+                fetch('sw.js', { cache: 'no-store' })
+                    .then(function (r) { return r.text(); })
+                    .then(function (текст) {
+                        var m = текст.match(/gokifu-[a-f0-9]+/);
+                        if (!m) return;
+                        var выложена = m[0];
+                        return caches.keys().then(function (наши) {
+                            // Заодно подчищаем кэши прежних версий: обычно их убирает сам service
+                            // worker при активации, но если он не активировался (мы уже на нём),
+                            // мусор остаётся и зря занимает место в браузере.
+                            наши.filter(function (k) {
+                                return k.indexOf('gokifu-') === 0 && k !== выложена;
+                            }).forEach(function (k) { caches.delete(k); });
+
+                            if (наши.indexOf(выложена) >= 0) return;      // мы на актуальной версии
+                            if (наши.length === 0) return;                // ещё ничего не кэшировали
+                            // Кэш отстал, а сам он не обновился — чиним жёстко и молча.
+                            return Promise.all(наши.map(function (k) { return caches.delete(k); }))
+                                .then(function () { return navigator.serviceWorker.getRegistration(); })
+                                .then(function (r) { return r ? r.unregister() : null; })
+                                .then(перезагрузить);
+                        });
+                    })
+                    .catch(function () { /* офлайн — просто работаем дальше на текущей версии */ });
+            }
+
+            // Версия сборки для показа в настройках: имя активного кэша. Пользователь по нему видит,
+            // свежая ли у него версия, а не выясняет это расследованием.
+            function запомнитьВерсиюСборки() {
+                caches.keys().then(function (наши) {
+                    var свой = наши.filter(function (k) { return k.indexOf('gokifu-') === 0; })[0];
+                    if (свой) window.__gokifuBuild = свой.replace('gokifu-', '');
+                }).catch(function () {});
+            }
+
+            window.addEventListener('load', function () {
+                запомнитьВерсиюСборки();
+                setTimeout(запомнитьВерсиюСборки, 5000);   // после установки кэша при первом запуске
+                navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
+                    .then(function (r) {
+                        r.update();
+                        // Периодическая проверка: приложение могут держать открытым сутками.
+                        setInterval(function () { r.update(); }, 30 * 60 * 1000);
+                    })
+                    .catch(function () { /* офлайн просто не включится */ });
+                setTimeout(сверитьВерсию, 3000); // после первичной загрузки, чтобы не мешать старту
+            });
+        })();
+    </script>
+</body>
+</html>
