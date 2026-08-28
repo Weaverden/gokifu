@@ -56,7 +56,7 @@
     <h2>Компьютер · Windows</h2>
     <p>Установщик с ярлыком и обновлением по кнопке внутри программы.</p>
     <div class="row">
-      <a class="btn" id="pc-link" href="https://github.com/Weaverden/gokifu/releases/latest">Скачать установщик</a>
+      <a class="btn" id="pc-link" href="https://gokifu.vercel.app/api/ydisk?url=https%3A%2F%2Fgithub.com%2FWeaverden%2Fgokifu%2Freleases%2Flatest%2Fdownload%2FGoKifu-setup.exe">Скачать установщик</a>
     </div>
     <div class="meta" id="pc-meta">версия уточняется…</div>
   </div>
@@ -66,7 +66,7 @@
     <p>Обычный путь — RuStore: оттуда приходят обновления. Файл APK нужен тем, у кого RuStore нет.</p>
     <div class="row">
       <a class="btn" href="https://www.rustore.ru/catalog/app/com.gokifu.app">Открыть в RuStore</a>
-      <a class="btn secondary" id="apk-link" href="https://github.com/Weaverden/gokifu/releases">Скачать APK</a>
+      <a class="btn secondary" id="apk-link" href="https://gokifu.vercel.app/api/ydisk?url=https%3A%2F%2Fgithub.com%2FWeaverden%2Fgokifu%2Freleases%2Fdownload%2Fandroid-v0.6.11%2FGoKifu-0.6.11.apk">Скачать APK</a>
     </div>
     <div class="meta" id="apk-meta">версия уточняется…</div>
   </div>
@@ -81,7 +81,9 @@
   </div>
 
   <footer>
-    Все выпуски и исходные тексты — <a href="https://github.com/Weaverden/gokifu">на GitHub</a>.
+    Все выпуски и исходные тексты — <a href="https://github.com/Weaverden/gokifu">на GitHub</a>.<br>
+    Загрузка идёт через наш промежуточный адрес: сам GitHub раздаёт файлы с сервера, который
+    в России не открывается.
   </footer>
 
 </div>
@@ -90,10 +92,15 @@
 // Заполняем версии и прямые ссылки из списка выпусков. Для ПК берём первый выпуск с файлом .exe,
 // для телефона — первый с .apk: у них разная нумерация и разные потоки меток.
 (async () => {
+  // Файлы выпусков GitHub отдаёт с отдельного адреса, который в России не открывается (проверено
+  // 28.08.2026: имя разрешается, соединение не устанавливается). Поэтому загрузка идёт через наш
+  // посредник — тот же, что обслуживает синхронизацию веб-версии. Замер: установщик 151 МБ за 39 с,
+  // контрольная сумма совпала.
+  const PROXY = "https://gokifu.vercel.app/api/ydisk?url=";
   const size = (b) => (b / 1048576).toFixed(1).replace(".", ",") + " МБ";
   const when = (s) => new Date(s).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" });
   const fill = (release, asset, linkId, metaId, label) => {
-    document.getElementById(linkId).href = asset.browser_download_url;
+    document.getElementById(linkId).href = PROXY + encodeURIComponent(asset.browser_download_url);
     document.getElementById(metaId).textContent =
       label + " " + release.tag_name.replace(/^(android-)?v?/, "") + " · " + size(asset.size) + " · " + when(release.published_at);
   };
