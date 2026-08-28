@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Go Kifu — скачать</title>
+<!--
+  Страница раздачи. Ссылки на файлы НЕ прописаны намертво: они подтягиваются из списка выпусков
+  GitHub при открытии страницы. Иначе после каждого выпуска пришлось бы править страницу руками,
+  а у выпусков для телефона нет постоянного адреса «последний» — он есть только у одного потока.
+  Если запрос к GitHub не прошёл (нет сети, блокировка), показываются обычные ссылки на разделы.
+-->
+<style>
+  :root {
+    --bg: #f2f2f7; --card: #ffffff; --label: #1c1c1e; --secondary: #6c6c70;
+    --accent: #2f6b4f; --border: #e2e2e7; --shadow: 0 1px 3px rgba(0,0,0,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #000000; --card: #1c1c1e; --label: #f2f2f7; --secondary: #98989f;
+      --accent: #4c9c74; --border: #2c2c2e; --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 32px 20px 64px; background: var(--bg); color: var(--label);
+    font: 17px/1.5 -apple-system, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 32px; line-height: 1.15; margin: 0 0 8px; letter-spacing: -0.02em; }
+  .lead { color: var(--secondary); margin: 0 0 32px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 20px; margin-bottom: 14px; box-shadow: var(--shadow);
+  }
+  .card h2 { font-size: 20px; margin: 0 0 4px; }
+  .card p { margin: 0 0 16px; color: var(--secondary); font-size: 15px; }
+  .meta { font-size: 13px; color: var(--secondary); margin-top: 10px; }
+  a.btn {
+    display: inline-block; padding: 11px 20px; border-radius: 10px; text-decoration: none;
+    background: var(--accent); color: #fff; font-weight: 600; font-size: 16px;
+  }
+  a.btn.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  footer { margin-top: 32px; color: var(--secondary); font-size: 14px; }
+  footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Go Kifu</h1>
+  <p class="lead">Запись и разбор партий го: на компьютере, на телефоне и прямо в браузере.</p>
+
+  <div class="card">
+    <h2>Компьютер · Windows</h2>
+    <p>Установщик с ярлыком и обновлением по кнопке внутри программы.</p>
+    <div class="row">
+      <a class="btn" id="pc-link" href="https://github.com/Weaverden/gokifu/releases/latest">Скачать установщик</a>
+    </div>
+    <div class="meta" id="pc-meta">версия уточняется…</div>
+  </div>
+
+  <div class="card">
+    <h2>Телефон и планшет · Android</h2>
+    <p>Обычный путь — RuStore: оттуда приходят обновления. Файл APK нужен тем, у кого RuStore нет.</p>
+    <div class="row">
+      <a class="btn" href="https://www.rustore.ru/catalog/app/com.gokifu.app">Открыть в RuStore</a>
+      <a class="btn secondary" id="apk-link" href="https://github.com/Weaverden/gokifu/releases">Скачать APK</a>
+    </div>
+    <div class="meta" id="apk-meta">версия уточняется…</div>
+  </div>
+
+  <div class="card">
+    <h2>Браузер</h2>
+    <p>Ничего устанавливать не нужно. На телефоне можно добавить на домашний экран — откроется как приложение.</p>
+    <div class="row">
+      <a class="btn" href="../">Открыть веб-версию</a>
+    </div>
+    <div class="meta">партии хранятся в браузере; вход в Яндекс.Диск синхронизирует их между устройствами</div>
+  </div>
+
+  <footer>
+    Все выпуски и исходные тексты — <a href="https://github.com/Weaverden/gokifu">на GitHub</a>.
+  </footer>
+
+</div>
+
+<script>
+// Заполняем версии и прямые ссылки из списка выпусков. Для ПК берём первый выпуск с файлом .exe,
+// для телефона — первый с .apk: у них разная нумерация и разные потоки меток.
+(async () => {
+  const size = (b) => (b / 1048576).toFixed(1).replace(".", ",") + " МБ";
+  const when = (s) => new Date(s).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" });
+  const fill = (release, asset, linkId, metaId, label) => {
+    document.getElementById(linkId).href = asset.browser_download_url;
+    document.getElementById(metaId).textContent =
+      label + " " + release.tag_name.replace(/^(android-)?v?/, "") + " · " + size(asset.size) + " · " + when(release.published_at);
+  };
+  try {
+    const r = await fetch("https://api.github.com/repos/Weaverden/gokifu/releases?per_page=20");
+    if (!r.ok) throw new Error(r.status);
+    const releases = await r.json();
+    const find = (ext) => {
+      for (const rel of releases) {
+        const a = (rel.assets || []).find((x) => x.name.toLowerCase().endsWith(ext));
+        if (a) return [rel, a];
+      }
+      return null;
+    };
+    const pc = find(".exe");
+    if (pc) fill(pc[0], pc[1], "pc-link", "pc-meta", "версия");
+    else document.getElementById("pc-meta").textContent = "";
+    const apk = find(".apk");
+    if (apk) fill(apk[0], apk[1], "apk-link", "apk-meta", "версия");
+    else document.getElementById("apk-meta").textContent = "";
+  } catch (e) {
+    // Не беда: кнопки и без этого ведут на страницы выпусков.
+    for (const id of ["pc-meta", "apk-meta"]) document.getElementById(id).textContent = "";
+  }
+})();
+</script>
+</body>
+</html>
