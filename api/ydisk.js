@@ -46,7 +46,23 @@ function reply(status, body, contentType) {
 export default async function handler(request) {
   if (request.method === "OPTIONS") return reply(204, null, null);
 
-  const target = new URL(request.url).searchParams.get("url");
+  const params = new URL(request.url).searchParams;
+
+  // ЗАМЕР (временный, для разбора медленной синхронизации 28.08.2026):
+  //   ?selftest=<байт> — отдать столько-то нулей: скорость ОТДАЧИ площадкой;
+  //   ?echo=1 с телом  — прочитать тело и вернуть его размер: скорость ПРИЁМА.
+  // Мелкие ответы пропускной способности не показывают: пробник в 20 байт приходил за 175 мс,
+  // а настоящий обмен занял 21,7 с — надо понять, в какую сторону и на чём именно.
+  const selftest = Number(params.get("selftest") || 0);
+  if (selftest > 0) {
+    return reply(200, new Uint8Array(Math.min(selftest, 20 * 1024 * 1024)), "application/octet-stream");
+  }
+  if (params.get("echo")) {
+    const body = new Uint8Array(await request.arrayBuffer());
+    return reply(200, "принято байт: " + body.length, "text/plain; charset=utf-8");
+  }
+
+  const target = params.get("url");
   if (!target) return reply(400, "нет параметра url", "text/plain; charset=utf-8");
 
   let host;
