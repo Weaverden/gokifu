@@ -137,6 +137,7 @@ string|set_sync_restore|UmVzdG9yZSBmcm9tIHRoZSBjbG91ZA==
 string|set_sync_restoring|RG93bmxvYWRpbmfigKY=
 string|set_sync_signout|U2lnbiBvdXQ=
 string|set_sync_uploaded|U3luY2VkLg==
+string|set_sync_uploading_secs|U3luY2luZ+KApiAlMSRkIHM=
 string|set_sync_uploading|U3luY2luZ+KApg==
 string|set_sync_upload|U3luYw==
 string|set_theme_dark|RGFyaw==

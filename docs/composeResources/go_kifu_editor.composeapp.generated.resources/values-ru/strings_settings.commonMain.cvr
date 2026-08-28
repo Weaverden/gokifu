@@ -137,6 +137,7 @@ string|set_sync_restore|0JLQvtGB0YHRgtCw0L3QvtCy0LjRgtGMINC40Lcg0L7QsdC70LDQutCw
 string|set_sync_restoring|0JfQsNCz0YDRg9C30LrQsOKApg==
 string|set_sync_signout|0JLRi9C50YLQuA==
 string|set_sync_uploaded|0KHQuNC90YXRgNC+0L3QuNC30LjRgNC+0LLQsNC90L4u
+string|set_sync_uploading_secs|0KHQuNC90YXRgNC+0L3QuNC30LDRhtC40Y/igKYgJTEkZCDRgQ==
 string|set_sync_uploading|0KHQuNC90YXRgNC+0L3QuNC30LDRhtC40Y/igKY=
 string|set_sync_upload|0KHQuNC90YXRgNC+0L3QuNC30LjRgNC+0LLQsNGC0Yw=
 string|set_theme_dark|0KLRkdC80L3QsNGP
