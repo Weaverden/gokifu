@@ -25,16 +25,33 @@ export const config = { runtime: "edge" };
 const ALLOW_ORIGIN = "*";
 const ALLOWED_HOST = /(^|\.)(disk\.yandex\.(ru|net|com)|yandex\.net)$/i;
 
+/*
+ * ВТОРАЯ ЗАДАЧА ЭТОГО ПОСРЕДНИКА (28.08.2026): раздача файлов выпусков.
+ *
+ * Файлы выпусков GitHub отдаёт не сам, а с отдельного хоста release-assets.githubusercontent.com,
+ * и у заказчика он НЕ ОТКРЫВАЕТСЯ: имя разрешается (185.199.109.133 — те же адреса, что у Pages),
+ * но соединение не устанавливается, то есть отсекают по имени. При этом github.com, api.github.com
+ * и сам Pages работают. Из-за этого висло скачивание установщика и APK, а заодно сломалось бы
+ * обновление ПК-версии из программы.
+ *
+ * Посредник стоит вне России и до GitHub достучится, поэтому пропускаем через него и ссылки на
+ * файлы выпусков — но ТОЛЬКО нашего репозитория, чтобы не стать общим пересыльщиком. Переадресацию
+ * на хост раздачи fetch проходит сам.
+ */
+const ALLOWED_RELEASE = /^https:\/\/github\.com\/Weaverden\/gokifu\/releases\/download\//i;
+
 /**
  * Ответ браузеру: СВОИ заголовки, а не пересланные чужие.
  *
  * Площадка разжимает полученный ответ сама, поэтому Content-Encoding и Content-Length от
  * Яндекса пересылать нельзя: браузер поверит заголовку, попытается распаковать уже
- * распакованное и оборвёт загрузку. Берём только тип содержимого.
+ * распакованное и оборвёт загрузку. Берём только тип содержимого — и, для файлов выпусков,
+ * имя сохраняемого файла: без него браузер назвал бы скачанное по имени обработчика.
  */
-function reply(status, body, contentType) {
+function reply(status, body, contentType, disposition) {
   const h = new Headers();
   if (contentType) h.set("Content-Type", contentType);
+  if (disposition) h.set("Content-Disposition", disposition);
   h.set("Access-Control-Allow-Origin", ALLOW_ORIGIN);
   h.set("Access-Control-Allow-Methods", "GET, PUT, POST, OPTIONS");
   h.set("Access-Control-Allow-Headers", "Content-Type");
@@ -57,8 +74,8 @@ export default async function handler(request) {
   } catch {
     return reply(400, "непонятный адрес", "text/plain; charset=utf-8");
   }
-  if (!ALLOWED_HOST.test(host)) {
-    return reply(403, "разрешён только Яндекс.Диск", "text/plain; charset=utf-8");
+  if (!ALLOWED_HOST.test(host) && !ALLOWED_RELEASE.test(target)) {
+    return reply(403, "разрешены только Яндекс.Диск и файлы выпусков Go Kifu", "text/plain; charset=utf-8");
   }
 
   const headers = new Headers();
@@ -71,7 +88,12 @@ export default async function handler(request) {
       headers,
       body: request.method === "GET" || request.method === "HEAD" ? undefined : request.body,
     });
-    return reply(answer.status, answer.body, answer.headers.get("Content-Type"));
+    return reply(
+      answer.status,
+      answer.body,
+      answer.headers.get("Content-Type"),
+      answer.headers.get("Content-Disposition"),
+    );
   } catch (e) {
     // Свой отказ С РАЗРЕШЕНИЯМИ лучше падения: у упавшего обработчика заголовков нет,
     // и приложение получает невнятный «сбой сети» вместо причины.
