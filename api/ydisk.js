@@ -52,10 +52,15 @@ const ALLOWED_RELEASE = /^https:\/\/github\.com\/Weaverden\/gokifu\/releases\/(l
  * распакованное и оборвёт загрузку. Берём только тип содержимого — и, для файлов выпусков,
  * имя сохраняемого файла: без него браузер назвал бы скачанное по имени обработчика.
  */
-function reply(status, body, contentType, disposition) {
+function reply(status, body, contentType, disposition, range) {
   const h = new Headers();
   if (contentType) h.set("Content-Type", contentType);
   if (disposition) h.set("Content-Disposition", disposition);
+  // Продолжение прерванной загрузки: программа просит остаток файла заголовком Range, и ей нужно
+  // видеть, что сервер отдал именно кусок (Content-Range). Установщик весит 156 МБ и идёт около
+  // минуты — одной заминки в канале хватало, чтобы начинать всё заново (14.09.2026).
+  if (range) h.set("Content-Range", range);
+  h.set("Accept-Ranges", "bytes");
   h.set("Access-Control-Allow-Origin", ALLOW_ORIGIN);
   h.set("Access-Control-Allow-Methods", "GET, PUT, POST, OPTIONS");
   h.set("Access-Control-Allow-Headers", "Content-Type");
@@ -85,6 +90,9 @@ export default async function handler(request) {
   const headers = new Headers();
   const type = request.headers.get("Content-Type");
   if (type) headers.set("Content-Type", type);
+  // Range передаём как есть: без него сервер отдаёт файл целиком, и докачка теряет смысл.
+  const wanted = request.headers.get("Range");
+  if (wanted) headers.set("Range", wanted);
 
   try {
     const answer = await fetch(target, {
@@ -97,6 +105,7 @@ export default async function handler(request) {
       answer.body,
       answer.headers.get("Content-Type"),
       answer.headers.get("Content-Disposition"),
+      answer.headers.get("Content-Range"),
     );
   } catch (e) {
     // Свой отказ С РАЗРЕШЕНИЯМИ лучше падения: у упавшего обработчика заголовков нет,
