@@ -1,6 +1,7 @@
 version:0
 string|cancel|2KXZhNi62KfYoQ==
 string|close|2KXYutmE2KfZgg==
+string|done|2KrZhQ==
 string|method_points|2YbZgtin2Lc=
 string|method_resign|2KfYs9iq2LPZhNin2YU=
 string|method_time|2YjZgtiq
@@ -14,6 +15,9 @@ string|score_estimate_area|2K3Ys9ioINin2YTZhdiz2KfYrdipOiAlMSRzICjYr9in2YXZhyAlM
 string|score_estimate_territory|2K3Ys9ioINin2YTZhdmG2LfZgtipOiAlMSRzICjYr9in2YXZhyAlMiRkKQ==
 string|score_final_result|2KfZhNmG2KrZitis2Kkg2KfZhNmG2YfYp9im2YrYqSAo2YLYp9io2YTYqSDZhNmE2KrYudiv2YrZhCk=
 string|score_manual_result|2KfZhNmG2KrZitis2KkgKNmK2K/ZiNmK2YvYpyk=
+string|score_margin_default|MC41
+string|score_margin_placeholder|2YXYq9in2YQ6IDcuNQ==
+string|score_margin_unit|2YbZgti32Kk=
 string|score_placeholder|2YXYq9in2YQ6IEIrMy41
 string|score_sgf_hint|2KrZhtiz2YrZgiBTR0Y6IEIrUiAo2KfYs9iq2LPZhNin2YUp2IwgVyszLjUgKNmG2YLYp9i3KdiMIEIrVCAo2YjZgtiqKdiMIERyYXcgKNiq2LnYp9iv2YQpLg==
 string|score_title|2KfZhNmG2KrZitis2Kk=

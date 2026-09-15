@@ -1,6 +1,7 @@
 version:0
 string|cancel|4KSw4KSm4KWN4KSmIOCkleCksOClh+Ckgg==
 string|close|4KSs4KSC4KSmIOCkleCksOClh+Ckgg==
+string|done|4KS54KWLIOCkl+Ckr+Ckvg==
 string|method_points|4KSF4KSC4KSV
 string|method_resign|4KS44KSu4KSw4KWN4KSq4KSj
 string|method_time|4KS44KSu4KSv
@@ -14,6 +15,9 @@ string|score_estimate_area|4KSV4KWN4KS34KWH4KSk4KWN4KSw4KSr4KSyIChhcmVhKSDgpJXgp
 string|score_estimate_territory|4KSV4KWN4KS34KWH4KSk4KWN4KSwICh0ZXJyaXRvcnkpIOCkleClhyDgpIXgpKjgpYHgpLjgpL7gpLA6ICUxJHMgKOCkpuCkvuCkruClhyAlMiRkKQ==
 string|score_final_result|4KSF4KSC4KSk4KS/4KSuIOCkquCksOCkv+Cko+CkvuCkriAo4KS44KSC4KSq4KS+4KSm4KSoIOCkr+Cli+Ckl+CljeCkryk=
 string|score_manual_result|4KSq4KSw4KS/4KSj4KS+4KSuICjgpK7gpYjgpKjgpY3gpK/gpYHgpIXgpLIp
+string|score_margin_default|MC41
+string|score_margin_placeholder|4KSc4KWI4KS44KWHIDcuNQ==
+string|score_margin_unit|4KSF4KSC4KSV
 string|score_placeholder|4KSJ4KSm4KS+4KS54KSw4KSjIOCkleClhyDgpLLgpL/gpI8sIEIrMy41
 string|score_sgf_hint|U0dGIOCkquCljeCksOCkvuCksOClguCkqjogQitSICjgpLjgpK7gpLDgpY3gpKrgpKMpLCBXKzMuNSAo4KSF4KSC4KSVKSwgQitUICjgpLjgpK7gpK8pLCBEcmF3ICjgpKzgpLDgpL7gpKzgpLDgpYApLg==
 string|score_title|4KS44KWN4KSV4KWL4KSw

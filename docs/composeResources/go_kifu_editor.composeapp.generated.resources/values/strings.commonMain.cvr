@@ -1,6 +1,7 @@
 version:0
 string|cancel|Q2FuY2Vs
 string|close|Q2xvc2U=
+string|done|RG9uZQ==
 string|method_points|UG9pbnRz
 string|method_resign|UmVzaWdu
 string|method_time|VGltZQ==
@@ -14,6 +15,9 @@ string|score_estimate_area|QnkgYXJlYTogJTEkcyAoZGFtZSAlMiRkKQ==
 string|score_estimate_territory|QnkgdGVycml0b3J5OiAlMSRzIChkYW1lICUyJGQp
 string|score_final_result|RmluYWwgcmVzdWx0IChlZGl0YWJsZSk=
 string|score_manual_result|UmVzdWx0IChtYW51YWwp
+string|score_margin_default|MC41
+string|score_margin_placeholder|ZS5nLiA3LjU=
+string|score_margin_unit|cG9pbnRz
 string|score_placeholder|ZS5nLiBCKzMuNQ==
 string|score_sgf_hint|U0dGIGZvcm1hdDogQitSIChyZXNpZ24pLCBXKzMuNSAocG9pbnRzKSwgQitUICh0aW1lKSwgRHJhdy4=
 string|score_title|U2NvcmU=

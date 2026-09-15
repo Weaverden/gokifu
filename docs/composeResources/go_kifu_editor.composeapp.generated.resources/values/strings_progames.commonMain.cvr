@@ -3,6 +3,8 @@ string|pg_added|QWRkZWQ6ICUxJGQ=
 string|pg_close|Q2xvc2U=
 string|pg_empty|VGFwIOKAnFVwZGF0ZeKAnSB0byBsb2FkIGZyZXNoIHByb2Zlc3Npb25hbCBnYW1lcyBmcm9tIGdva2lmdS5jb20u
 string|pg_error_network|TmV0d29yayBlcnJvci4gQ2hlY2sgeW91ciBjb25uZWN0aW9uIGFuZCB0cnkgYWdhaW4u
+string|pg_filter_country_none|Tm8gY29kZQ==
+string|pg_filter_country|Q291bnRyeSBjb2Rl
 string|pg_loading_game|TG9hZGluZyBnYW1l4oCm
 string|pg_nothing_found|Tm90aGluZyBmb3VuZA==
 string|pg_ok|T0s=
