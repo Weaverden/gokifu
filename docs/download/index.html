@@ -43,7 +43,7 @@
   a.btn.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
   .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
   footer { margin-top: 32px; color: var(--secondary); font-size: 14px; }
-  footer a { color: var(--accent); }
+  footer a, .meta a { color: var(--accent); }
 </style>
 </head>
 <body>
@@ -56,9 +56,10 @@
     <h2>Компьютер · Windows</h2>
     <p>Установщик с ярлыком и обновлением по кнопке внутри программы.</p>
     <div class="row">
-      <a class="btn" id="pc-link" href="https://gokifu.vercel.app/api/ydisk?url=https%3A%2F%2Fgithub.com%2FWeaverden%2Fgokifu%2Freleases%2Fdownload%2Fv1.4.1%2FGoKifu-setup.exe">Скачать установщик</a>
+      <a class="btn" id="pc-link" href="https://github.com/Weaverden/gokifu/releases/download/v1.7.4/GoKifu-setup.exe">Скачать установщик</a>
     </div>
     <div class="meta" id="pc-meta">версия уточняется…</div>
+    <div class="meta">Не скачивается? <a id="pc-alt" href="https://gokifu.vercel.app/api/ydisk?url=https%3A%2F%2Fgithub.com%2FWeaverden%2Fgokifu%2Freleases%2Fdownload%2Fv1.7.4%2FGoKifu-setup.exe">Запасная ссылка</a></div>
   </div>
 
   <div class="card">
@@ -66,9 +67,10 @@
     <p>Обычный путь — RuStore: оттуда приходят обновления. Файл APK нужен тем, у кого RuStore нет.</p>
     <div class="row">
       <a class="btn" href="https://www.rustore.ru/catalog/app/com.gokifu.app">Открыть в RuStore</a>
-      <a class="btn secondary" id="apk-link" href="https://gokifu.vercel.app/api/ydisk?url=https%3A%2F%2Fgithub.com%2FWeaverden%2Fgokifu%2Freleases%2Fdownload%2Fandroid-v0.6.15%2FGoKifu-0.6.15.apk">Скачать APK</a>
+      <a class="btn secondary" id="apk-link" href="https://github.com/Weaverden/gokifu/releases/download/android-v0.6.15/GoKifu-0.6.15.apk">Скачать APK</a>
     </div>
     <div class="meta" id="apk-meta">версия уточняется…</div>
+    <div class="meta">APK не скачивается? <a id="apk-alt" href="https://gokifu.vercel.app/api/ydisk?url=https%3A%2F%2Fgithub.com%2FWeaverden%2Fgokifu%2Freleases%2Fdownload%2Fandroid-v0.6.15%2FGoKifu-0.6.15.apk">Запасная ссылка</a></div>
   </div>
 
   <div class="card">
@@ -82,8 +84,8 @@
 
   <footer>
     Все выпуски и исходные тексты — <a href="https://github.com/Weaverden/gokifu">на GitHub</a>.<br>
-    Загрузка идёт через наш промежуточный адрес: сам GitHub раздаёт файлы с сервера, который
-    в России не открывается.
+    Файлы скачиваются прямо с GitHub. Если загрузка не начинается или обрывается, нажмите
+    «Запасная ссылка» — она ведёт через наш промежуточный адрес.
   </footer>
 
 </div>
@@ -92,15 +94,16 @@
 // Заполняем версии и прямые ссылки из списка выпусков. Для ПК берём первый выпуск с файлом .exe,
 // для телефона — первый с .apk: у них разная нумерация и разные потоки меток.
 (async () => {
-  // Файлы выпусков GitHub отдаёт с отдельного адреса, который в России не открывается (проверено
-  // 28.08.2026: имя разрешается, соединение не устанавливается). Поэтому загрузка идёт через наш
-  // посредник — тот же, что обслуживает синхронизацию веб-версии. Замер: установщик 151 МБ за 39 с,
-  // контрольная сумма совпала.
+  // Два канала (26.09.2026): основная кнопка — GitHub напрямую, строка под ней — наш посредник на
+  // Vercel. 28.08.2026 файлы GitHub в России не открывались, и всё шло через посредник; 26.09 —
+  // наоборот: GitHub открывается, а *.vercel.app закрыт. Какой канал откроется завтра, неизвестно,
+  // поэтому оба.
   const PROXY = "https://gokifu.vercel.app/api/ydisk?url=";
   const size = (b) => (b / 1048576).toFixed(1).replace(".", ",") + " МБ";
   const when = (s) => new Date(s).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" });
   const fill = (release, asset, linkId, metaId, label) => {
-    document.getElementById(linkId).href = PROXY + encodeURIComponent(asset.browser_download_url);
+    document.getElementById(linkId).href = asset.browser_download_url;
+    document.getElementById(linkId.replace("-link", "-alt")).href = PROXY + encodeURIComponent(asset.browser_download_url);
     document.getElementById(metaId).textContent =
       label + " " + release.tag_name.replace(/^(android-)?v?/, "") + " · " + size(asset.size) + " · " + when(release.published_at);
   };
